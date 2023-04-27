@@ -34,6 +34,10 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        question: {
+            type: String,
+            required: true,
+        },
         role: {
             type: String,
             default: "member"

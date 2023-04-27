@@ -9,7 +9,7 @@ import JWT from "jsonwebtoken"
 export const registerController = async (req, res, next) => {
     // console.log("Register route hitted!".bgBlue.yellow);
     try {
-        const { name, username, email, phone, password, address, role } = req.body;
+        const { name, username, email, phone, password, address, question, role } = req.body;
 
         // let formErrors = [];
         let formErrors = {};
@@ -56,6 +56,14 @@ export const registerController = async (req, res, next) => {
                 error: formErrors
             })
         }
+        if (!question) {
+            formErrors.addressError = "Security question answer is required!"
+            return res.send({
+                success: false,
+                message: "Form validation error!",
+                error: formErrors
+            })
+        }
 
         // Existing Username Check
         // const checkUsername = await Users.findOne({username:username})
@@ -94,7 +102,7 @@ export const registerController = async (req, res, next) => {
             }
         );
         */
-        const user = new Users({ name, username, email, password: hashedPassword, phone, address, role });
+        const user = new Users({ name, username, email, password: hashedPassword, phone, address, question, role });
 
         await user.save();
 
@@ -195,3 +203,67 @@ export const loginController = async (req, res, next) => {
         })
     }
 }
+
+export const forgotPasswordController = async (req, res) => {
+    try {
+        const { email, question, newPassword } = req.body;
+
+        //empty validation
+        if (!email) {
+            return res.send({
+                success: false,
+                message: "Form validation error!",
+                error: "Email is required!"
+            })
+        }
+        if (!question) {
+            return res.send({
+                success: false,
+                message: "Form validation error!",
+                error: "Answer for security question is required!"
+            })
+        }
+
+        if (!newPassword) {
+            return res.send({
+                success: false,
+                message: "Form validation error!",
+                error: "New Password is required!"
+            })
+        }
+
+        const user = await Users.findOne({ email, question });
+
+        if (!user) {
+            res.status(404).send({
+                success: false,
+                message: "Incorrect details.",
+                error: "Incorrect email and answer combination."
+            })
+        }
+        else {
+            const hashedPassword = await hashPassword(newPassword)
+
+            // console.log(user)
+            await Users.updateOne({ _id: user._id }, { $set: { password: hashedPassword } })
+            // await Users.findByIdAndUpdate(user._id, { $set: { password: hashedPassword } });
+
+            res.status(200).send({
+                success: true,
+                message: "Password changed successfully.",
+            })
+        }
+    }
+    catch (error) {
+        res.status(500).send({
+            success: false,
+            message: "Error occured!",
+            // error: `Error : ${error}`
+            error
+        })
+    }
+}
+
+/* export const resetPasswordController = (req, res) => {
+
+} */
