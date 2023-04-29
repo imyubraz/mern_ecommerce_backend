@@ -23,10 +23,19 @@ router.post('/forgot-password', forgotPasswordController);
 
 router.get('/test', isLoggedIn, isAdmin, testController);
 
+// for user route protection
 router.get('/user-auth', isLoggedIn, (req, res) => {
     res.status(200).send({
         success: true,
-        message: "Access Allowed!"
+        message: "User Access Allowed!"
+    })
+});
+
+// for admin route protection
+router.get('/admin-auth', isLoggedIn, isAdmin, (req, res) => {
+    res.status(200).send({
+        success: true,
+        message: "Admin Access Allowed!"
     })
 });
 

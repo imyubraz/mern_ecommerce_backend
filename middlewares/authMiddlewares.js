@@ -43,7 +43,12 @@ export const isLoggedIn = async (req, res, next) => {
 
 export const isAdmin = async (req, res, next) => {
     try {
-        const token = req.headers.authorization.split(" ")[1];
+        //for postman
+        // const token = req.headers.authorization.split(" ")[1];
+
+        // for frontend
+        const token = req.headers.authorization;
+
         const decodeToken = await JWT.verify(token, process.env.JWT_SECRET_KEY);
         // console.log(decodeToken.role);
         if (decodeToken.role !== "admin") {
